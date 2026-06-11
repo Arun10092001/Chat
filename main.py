@@ -24,7 +24,8 @@ class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY") or os.urandom(24)
 
     _db_url = os.environ.get(
-        "DATABASE_URL", "postgresql://postgres:Arun%401002@localhost:5432/postgres")
+        "DATABASE_URL",
+        "postgresql://chitchat_zyfl_user:f33t2d1DD1BsKSJb5HdfQt3Oe7ViV5wj@dpg-d8la23vavr4c73f5icm0-a.oregon-postgres.render.com/chitchat_zyfl")
     if _db_url.startswith("postgres://"):
         _db_url = _db_url.replace("postgres://", "postgresql://", 1)
 
@@ -78,7 +79,7 @@ class Message(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    username = db.Column(
+    user_name = db.Column(
         db.String(100),
         nullable=False
     )
