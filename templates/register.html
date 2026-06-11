@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}" />
+
+<div class="auth-shell">
+  <div class="auth-page-header">
+    <p class="eyebrow">Welcome to</p>
+    <h1>Chitchat</h1>
+  </div>
+
+  <div class="auth-card">
+    <h2>Register</h2>
+    {% if message %}
+    <p class="form-error">{{ message }}</p>
+    {% endif %} {% if error %}
+    <p class="form-error">{{ error }}</p>
+    {% endif %}
+    <form class="auth-form" method="POST">
+      <label>
+        Username
+        <input type="text" name="username" placeholder="Username" required />
+      </label>
+
+      <label>
+        Password
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          required
+        />
+      </label>
+
+      <button type="submit">Register</button>
+    </form>
+  </div>
+</div>
