@@ -106,6 +106,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 socketIO = SocketIO(
     app,
     cors_allowed_origins=app.config["CORS_ORIGINS"],
+    async_mode='threading',
     logger=True,
     engineio_logger=True
 )
