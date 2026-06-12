@@ -79,7 +79,7 @@ class Message(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    user_name = db.Column(
+    username = db.Column(
         db.String(100),
         nullable=False
     )
@@ -246,7 +246,7 @@ def set_username(data: dict):
     try:
         name = data.get('username')
         if not name:
-            return
+            return {'status': 'error', 'message': 'Missing username'}
 
         if request.sid in active_users:
             active_users[request.sid]['username'] = name
@@ -261,9 +261,11 @@ def set_username(data: dict):
         }, broadcast=True)
 
         logger.info(f"Set username for sid {request.sid}: {name}")
+        return {'status': 'ok'}
 
     except Exception as e:
         logger.error(f"Error in set_username: {str(e)}")
+        return {'status': 'error', 'message': str(e)}
 
 
 @socketIO.on('join')
@@ -276,6 +278,12 @@ def on_join(data: dict):
         if room not in app.config['CHAT_ROOMS']:
             logger.warning(f"No room available")
             return
+
+        if request.sid not in active_users:
+            active_users[request.sid] = {
+                'username': username,
+                'connected_at': datetime.now().isoformat()
+            }
 
         join_room(room)
         messages = (
@@ -305,6 +313,10 @@ def on_join(data: dict):
             'timestamp': datetime.now().isoformat()
         }, room=room)
 
+        emit('active_users', {
+            'users': [user['username'] for user in active_users.values()]
+        }, broadcast=True)
+
         logger.info(f"User {username} has joined")
 
     except Exception as e:
@@ -328,6 +340,10 @@ def on_leave(data: dict):
             'timestamp': datetime.now().isoformat()
         }, room=room)
 
+        emit('active_users', {
+            'users': [user['username'] for user in active_users.values()]
+        }, broadcast=True)
+
         logger.info(f"User {username} has left")
 
     except Exception as e:
@@ -336,6 +352,7 @@ def on_leave(data: dict):
 
 @socketIO.on('message')
 def handle_message(data: dict):
+    print("MESSAGE RECEIVED:", data)
     try:
         username = active_users.get(request.sid, {}).get(
             'username', session.get('username', generate_username()))
@@ -370,6 +387,12 @@ def handle_message(data: dict):
                         'to': target_user,
                         'timestamp': timestamp
                     }, room=sid)
+                    emit('private_message', {
+                        'msg': message,
+                        'from': username,
+                        'to': target_user,
+                        'timestamp': timestamp
+                    }, room=request.sid)
                     return
 
         else:

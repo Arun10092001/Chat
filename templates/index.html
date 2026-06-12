@@ -17,36 +17,42 @@
           <p class="eyebrow">Live rooms</p>
           <h1>ChitChat</h1>
         </div>
-        <div class="profile-pill">Welcome <span id="username">{{username}}</span></div>
+        <div class="profile-pill">
+          Welcome <span id="username">{{username}}</span>
+        </div>
       </header>
 
       <main class="container">
-      <aside class="sidebar">
-        <div class="room-list">
-          <h3>Rooms</h3>
-          {% for room in rooms %}
-          <div class="room-item" onclick="joinRoom('{{room}}')">{{room}}</div>
-          {% endfor %}
-        </div>
-        <div class="user-list">
-          <h3>Online users</h3>
-          <div id="active-users"></div>
-        </div>
-      </aside>
-      <section class="main-chat" aria-label="Chat room">
-        <div id="chat"></div>
-        <div class="input-area">
-          <input
-            type="text"
-            id="message"
-            placeholder="Enter message..."
-            onkeyPress="handleKeyPress(event)"
-          />
-          <button onclick="sendMessage()">Send</button>
-        </div>
-      </section>
+        <aside class="sidebar">
+          <div class="room-list">
+            <h3>Rooms</h3>
+            {% for room in rooms %}
+            <div class="room-item" onclick="joinRoom('{{room}}')">{{room}}</div>
+            {% endfor %}
+          </div>
+          <div class="user-list">
+            <h3>Online users</h3>
+            <div id="active-users"></div>
+          </div>
+          <button onclick="logout()">Logout</button>
+        </aside>
+        <section class="main-chat" aria-label="Chat room">
+          <div id="chat"></div>
+          <div class="input-area">
+            <input
+              type="text"
+              id="message"
+              placeholder="Enter message..."
+              onkeypress="handleKeyPress(event)"
+            />
+            <button onclick="sendMessage()">Send</button>
+          </div>
+        </section>
       </main>
     </div>
+    <script>
+      window.loggedInUsername = {{ username|tojson }};
+    </script>
     <script src="{{url_for('static', filename='chat.js')}}"></script>
   </body>
 </html>

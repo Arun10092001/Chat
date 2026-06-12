@@ -196,6 +196,7 @@ h3 {
   background: var(--panel);
   box-shadow: var(--shadow);
   overflow: hidden;
+  height: 100%;
 }
 
 .sidebar {
@@ -254,6 +255,8 @@ h3 {
   display: grid;
   grid-template-rows: 1fr auto;
   background: #ffffff;
+  height: 100%;
+  min-height: 0;
 }
 
 #chat {

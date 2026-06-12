@@ -15,25 +15,28 @@ if (!username) {
   sessionStorage.setItem("username", username);
 }
 
-// update server-rendered name in the UI (overrides shared cookie session name)
+if (window.loggedInUsername) {
+  username = window.loggedInUsername;
+  sessionStorage.setItem("username", username);
+}
+
+// update server-rendered name in the UI (or fallback username)
 const usernameEl = document.getElementById("username");
 if (usernameEl) {
   usernameEl.textContent = username;
-}
-
-if (window.loggedInUsername) {
-  sessionStorage.setItem("username", username);
 }
 let currentRoom = "General";
 const roomMessages = {};
 
 socket.on("connect", () => {
   // inform server of this tab's username (per-tab)
-  socket.emit("set_username", { username });
-  joinRoom(currentRoom);
+  socket.emit("set_username", { username }, () => {
+    joinRoom(currentRoom);
+  });
 });
 
 socket.on("message", (data) => {
+  console.log("MESSAGE EVENT:", data);
   addMessage(
     data.username,
     data.msg,
@@ -67,6 +70,8 @@ socket.on("chat_history", (data) => {
   const chat = document.getElementById("chat");
   chat.innerHTML = "";
 
+  roomMessages[currentRoom] = [];
+
   data.messages.forEach((msg) => {
     addMessage(
       msg.username,
@@ -74,6 +79,8 @@ socket.on("chat_history", (data) => {
       msg.username === username ? "own" : "other",
     );
   });
+
+  chat.scrollTop = chat.scrollHeight;
 });
 
 function addMessage(sender, message, type) {
@@ -113,6 +120,7 @@ function sendMessage() {
         msg: privateMsg,
         type: "private",
         target,
+        room: currentRoom,
       });
       // show private message locally for the sender as an echoed private message
       addMessage(username, `[Private to ${target}] ${privateMsg}`, "private");
@@ -129,22 +137,18 @@ function sendMessage() {
 }
 
 function joinRoom(room) {
+  if (room === currentRoom && roomMessages[room]) {
+    return;
+  }
+
   if (socket.connected && currentRoom !== room) {
     socket.emit("leave", { room: currentRoom });
   }
 
   currentRoom = room;
   socket.emit("join", { room });
+
   setActiveRoom(room);
-
-  const chat = document.getElementById("chat");
-  chat.innerHTML = "";
-
-  if (roomMessages[room]) {
-    const messages = [...roomMessages[room]];
-    roomMessages[room] = [];
-    messages.forEach((msg) => addMessage(msg.sender, msg.message, msg.type));
-  }
 }
 
 function setActiveRoom(room) {
@@ -164,6 +168,10 @@ function handleKeyPress(event) {
     event.preventDefault();
     sendMessage();
   }
+}
+
+function logout() {
+  window.location.href = "/logout";
 }
 
 document.addEventListener("DOMContentLoaded", () => {
