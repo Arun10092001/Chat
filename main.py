@@ -352,7 +352,6 @@ def on_leave(data: dict):
 
 @socketIO.on('message')
 def handle_message(data: dict):
-    print("MESSAGE RECEIVED:", data)
     try:
         username = active_users.get(request.sid, {}).get(
             'username', session.get('username', generate_username()))
@@ -427,10 +426,8 @@ with app.app_context():
 
 
 if __name__ == "__main__":
-    # Changing the port to 5005 to avoid ANY permission or in-use errors
     port = int(os.environ.get('PORT', 5000))
 
-    # Debug mode is turned ON here so you don't need to manually restart when you change code!
     socketIO.run(
         app,
         host='0.0.0.0',
